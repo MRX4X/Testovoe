@@ -1,0 +1,16 @@
+---
+# vars file for users
+
+custom_groups:
+  - { name: main_group, state: present }
+  - { name: docker, state: absent }
+
+users:
+  - name: user1
+    shell: /bin/zsh
+    groups: [main_group, sudo]
+    ssh_public_key: ""
+    password: "123"
+    
+  - name: removed_user
+    state: absent

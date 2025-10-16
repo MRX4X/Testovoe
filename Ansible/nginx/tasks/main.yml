@@ -1,0 +1,36 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Install Nginx
+  ansible.builtin.package:
+    name: nginx
+    state: latest
+
+- name: Create image directory
+  ansible.builtin.file:
+    path: /srv/images
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+
+- name: Cope config_file vhost
+  ansible.builtin.template:
+    src: images.conf.j2
+    dest: /etc/nginx/sites-available/images.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/images.conf
+    dest: /etc/nginx/sites-enabled/images.conf
+    state: link
+  notify: Reload nginx
+
+- name: Disable default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx

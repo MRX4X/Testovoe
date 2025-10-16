@@ -1,0 +1,33 @@
+---
+- name: Install zsh
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+
+- name: Gather zsh users
+  set_fact:
+    zsh_users: "{{ users | selectattr(shell, defined) | selectattr(shell, search, zsh) | list }}"
+  when: users is defined
+
+- name: Install git (required for oh-my-zsh)
+  apt:
+    name: git
+    state: present
+
+- name: Install oh-my-zsh for users with zsh shell
+  become_user: "{{ item.name }}"
+  shell: |
+    export RUNZSH=no
+    export CHSH=no
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true
+    fi
+    if [ ! -f "$HOME/.zshrc" ]; then
+      cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$HOME/.zshrc"
+      sed -i "s/^ZSH_THEME=.*/ZSH_THEME=\"{{ zsh_theme }}\"/" "$HOME/.zshrc"
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ zsh_users | default([]) }}"
+  when: zsh_users | length > 0

@@ -1,0 +1,8 @@
+- name: Start playbook
+  hosts: test-nodes
+  roles:
+    - package
+    - users
+    - shell
+    - static_copy
+    - nginx

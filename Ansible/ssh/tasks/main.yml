@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Configure_sshd_config
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - SSH HARDENING"
+    block: |
+      PermitRootLogin no
+      PermitEmptyPasswords no
+      LogLevel VERBOSE
+      X11Forwarding no
+  notify: Restart sshd

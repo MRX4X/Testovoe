@@ -1,0 +1,9 @@
+---
+- name: Copy all images from role files directory
+  copy:
+    src: "images/" 
+    dest: "/srv/images/"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+    directory_mode: "0755"

@@ -1,0 +1,35 @@
+---
+
+- name: Add/delete group
+  group:
+    name: "{{ item.name }}"
+    state: "{{ item.state | default(present) }}"
+  loop: "{{ custom_groups }}"
+  when: custom_groups is defined
+
+- name: Add/delete users
+  user:
+    name: "{{ item.name }}"
+    state: present
+    shell: "{{ item.shell | default(/bin/bash) }}"
+    groups: "{{ item.groups | default([]) | join(,) }}"
+    append: true
+    password: "{{ item.password | default(omit) }}"
+    create_home: true
+  loop: "{{ users }}"
+  when: users is defined
+
+- name: Set authorized keys for created users
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_public_key }}"
+    state: present
+  when: item.ssh_public_key is defined and (item.state is not defined or item.state == present)
+  loop: "{{ users }}"
+
+- name: Manage users absent
+  user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: true
+  loop: "{{ users }}"
